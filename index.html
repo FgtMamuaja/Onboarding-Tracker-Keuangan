@@ -375,43 +375,29 @@
     const DELAY_MS = 2000;
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    // Validasi token dulu sebelum fetch
-    const validateToken = async () => {
-      const res = await fetch(`https://api.telegram.org/bot${formData.telegram_token}/getMe`);
-      const data = await res.json();
-      if (!data.ok) throw new Error("Token tidak valid. Pastikan token sudah benar.");
-      return true;
-    };
-
-    // Fetch chat ID tanpa deleteWebhook - pakai offset -1 untuk pesan terbaru saja
-    const tryFetch = async (attempt) => {
+    // Semua request ke Telegram diproxy melalui n8n untuk menghindari CORS
+    const proxyFetch = async (attempt) => {
       btn.innerHTML = `<span class="btn-loading"><span class="spinner-green"></span>Mendeteksi${attempt > 1 ? ` (percobaan ${attempt}/${MAX_RETRY})` : ""}...</span>`;
-      
-      // Gunakan getUpdates dengan allowed_updates hanya message
-      const res = await fetch(
-        `https://api.telegram.org/bot${formData.telegram_token}/getUpdates?limit=10&allowed_updates=["message"]`
-      );
-      const data = await res.json();
-      
-      if (!data.ok) throw new Error("Token tidak valid. Pastikan token sudah benar dan coba lagi.");
-      if (!data.result || data.result.length === 0) return null;
 
-      // Ambil chat ID dari update terbaru
-      for (let i = data.result.length - 1; i >= 0; i--) {
-        const update = data.result[i];
-        const chatId = update.message?.chat?.id || update.callback_query?.from?.id;
-        if (chatId) return String(chatId);
-      }
+      const res = await fetch('https://n8n-bagong71.deployaja.id/webhook/get-chat-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegram_token: formData.telegram_token })
+      });
+
+      if (!res.ok) throw new Error("Server error. Coba lagi.");
+      const data = await res.json();
+
+      if (data.error === 'invalid_token') throw new Error("Token tidak valid. Pastikan token sudah benar dan coba lagi.");
+      if (data.error === 'no_updates') return null;
+      if (data.chat_id) return String(data.chat_id);
       return null;
     };
 
     try {
-      // Validasi token dulu
-      await validateToken();
-
       let chatId = null;
       for (let attempt = 1; attempt <= MAX_RETRY; attempt++) {
-        chatId = await tryFetch(attempt);
+        chatId = await proxyFetch(attempt);
         if (chatId) break;
         if (attempt < MAX_RETRY) {
           btn.innerHTML = `<span class="btn-loading"><span class="spinner-green"></span>Menunggu pesan /start... (${attempt}/${MAX_RETRY})</span>`;
