@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aktivasi Tracker Keuangan</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #1e1e2e;
+    --accent: #7cfc8a;
+    --text: #f0f0f5;
+    --muted: #6b6b80;
+    --error: #ff6b6b;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,252,138,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,252,138,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(124,252,138,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .container { width: 100%; max-width: 560px; position: relative; z-index: 1; }
+
+  .header { margin-bottom: 40px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(124,252,138,0.08); border: 1px solid rgba(124,252,138,0.2);
+    color: var(--accent); font-size: 12px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 100px; margin-bottom: 20px;
+  }
+  .badge::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 42px); font-weight: 800;
+    line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 12px;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 15px; line-height: 1.6; font-weight: 300; }
+
+  .steps { display: flex; gap: 8px; margin-bottom: 32px; }
+  .step-dot { height: 3px; border-radius: 2px; background: var(--border); transition: all 0.4s ease; flex: 1; }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: rgba(124,252,138,0.3); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 36px; position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(124,252,138,0.3), transparent);
+  }
+
+  .step-panel { display: none; animation: fadeIn 0.3s ease; }
+  .step-panel.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .step-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .step-desc { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.5; }
+
+  .field { margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+
+  input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px;
+    padding: 14px 16px; border-radius: 10px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input::placeholder { color: var(--muted); }
+  input:focus { border-color: rgba(124,252,138,0.4); box-shadow: 0 0 0 3px rgba(124,252,138,0.06); }
+  input.error { border-color: var(--error); }
+
+  .field-error { color: var(--error); font-size: 12px; margin-top: 6px; display: none; }
+
+  .instruction {
+    background: rgba(124,252,138,0.04); border: 1px solid rgba(124,252,138,0.12);
+    border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;
+  }
+  .instruction-title { font-size: 13px; font-weight: 500; color: var(--accent); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .instruction ol { padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+  .instruction ol li { margin-bottom: 2px; }
+  .instruction code { background: rgba(124,252,138,0.1); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: monospace; }
+
+  .btn {
+    width: 100%; padding: 15px 24px; border-radius: 10px;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.2s ease; letter-spacing: 0.01em;
+  }
+  .btn-primary { background: var(--accent); color: #0a0a0f; }
+  .btn-primary:hover { background: #90ff9e; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,252,138,0.2); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-secondary {
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); margin-bottom: 12px;
+  }
+  .btn-secondary:hover { color: var(--text); border-color: var(--muted); }
+
+  /* Fetch button */
+  .btn-fetch {
+    background: rgba(124,252,138,0.08);
+    border: 1px solid rgba(124,252,138,0.25);
+    color: var(--accent);
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600;
+    width: 100%; padding: 15px 24px; border-radius: 10px;
+    cursor: pointer; transition: all 0.2s ease; letter-spacing: 0.01em;
+  }
+  .btn-fetch:hover { background: rgba(124,252,138,0.14); transform: translateY(-1px); }
+  .btn-fetch:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* Chat ID result display */
+  .chatid-display {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg); border: 1px solid rgba(124,252,138,0.3);
+    border-radius: 10px; padding: 14px 16px; margin-top: 8px;
+  }
+  .chatid-display .chatid-value { font-size: 20px; font-family: monospace; color: var(--text); font-weight: 600; letter-spacing: 0.05em; }
+  .chatid-badge {
+    font-size: 12px; font-weight: 500; color: var(--accent);
+    background: rgba(124,252,138,0.1); border: 1px solid rgba(124,252,138,0.2);
+    padding: 4px 10px; border-radius: 100px;
+  }
+
+  /* Error box */
+  .error-box {
+    background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2);
+    color: var(--error); font-size: 13px; padding: 12px 16px;
+    border-radius: 8px; line-height: 1.6; display: none;
+  }
+
+  .btn-loading { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.2); border-top-color: #0a0a0f; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  .spinner-green { width: 16px; height: 16px; border: 2px solid rgba(124,252,138,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .success-icon { width: 64px; height: 64px; background: rgba(124,252,138,0.1); border: 2px solid rgba(124,252,138,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 24px; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+  .success-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 10px; }
+  .success-desc { color: var(--muted); font-size: 14px; text-align: center; line-height: 1.6; }
+
+  .footer { text-align: center; margin-top: 24px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="badge">Aktivasi Produk</div>
+    <h1>Aktifkan <span>Tracker</span><br>Keuangan Anda</h1>
+    <p class="subtitle">Isi form di bawah untuk mengaktifkan bot Telegram dan Google Sheet Anda secara otomatis.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step-dot active" id="dot-1"></div>
+    <div class="step-dot" id="dot-2"></div>
+    <div class="step-dot" id="dot-3"></div>
+  </div>
+
+  <div class="card">
+
+    <!-- Step 1: Data Diri -->
+    <div class="step-panel active" id="step-1">
+      <div class="step-title">Data Diri</div>
+      <div class="step-desc">Masukkan nama dan email Google Anda — sheet akan di-share ke email ini.</div>
+
+      <div class="field">
+        <label>Nama Lengkap</label>
+        <input type="text" id="nama" placeholder="Contoh: Budi Santoso">
+        <div class="field-error" id="err-nama">Nama tidak boleh kosong</div>
+      </div>
+
+      <div class="field">
+        <label>Email Google</label>
+        <input type="email" id="email" placeholder="Contoh: budi@gmail.com">
+        <div class="field-error" id="err-email">Masukkan email yang valid</div>
+      </div>
+
+      <button class="btn btn-primary" onclick="goStep2()">Lanjut →</button>
+    </div>
+
+    <!-- Step 2: Token Bot -->
+    <div class="step-panel" id="step-2">
+      <div class="step-title">Token Bot Telegram</div>
+      <div class="step-desc">Buat bot Telegram Anda sendiri dalam 2 menit.</div>
+
+      <div class="instruction">
+        <div class="instruction-title">📱 Cara dapat Token Bot</div>
+        <ol>
+          <li>Buka Telegram → cari <code>@BotFather</code></li>
+          <li>Ketik <code>/newbot</code> dan ikuti instruksinya</li>
+          <li>Beri nama bot Anda (bebas)</li>
+          <li>Copy token yang diberikan (format: <code>123456:ABC-xxx</code>)</li>
+        </ol>
+      </div>
+
+      <div class="field">
+        <label>Token Bot Telegram</label>
+        <input type="text" id="token" placeholder="Contoh: 7123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw">
+        <div class="field-error" id="err-token">Masukkan token bot yang valid</div>
+      </div>
+
+      <button class="btn btn-secondary" onclick="goStep1()">← Kembali</button>
+      <button class="btn btn-primary" onclick="goStep3()">Lanjut →</button>
+    </div>
+
+    <!-- Step 3: Verifikasi Bot (Auto fetch Chat ID) -->
+    <div class="step-panel" id="step-3">
+      <div class="step-title">Verifikasi Bot</div>
+      <div class="step-desc">Satu langkah lagi — kirim pesan ke bot Anda, lalu klik deteksi.</div>
+
+      <div class="instruction">
+        <div class="instruction-title">📱 Cara verifikasi</div>
+        <ol>
+          <li>Buka Telegram → cari nama bot yang baru Anda buat</li>
+          <li>Kirim pesan <code>/start</code> ke bot tersebut</li>
+          <li>Kembali ke sini → klik <strong style="color:var(--accent)">Deteksi Otomatis</strong> di bawah</li>
+        </ol>
+      </div>
+
+      <!-- Fetch area -->
+      <button class="btn btn-fetch" id="btn-fetch" onclick="fetchChatId()">
+        🔍 Deteksi Chat ID Otomatis
+      </button>
+
+      <!-- Result box (hidden until fetched) -->
+      <div id="chatid-result" style="display:none; margin-top:16px;">
+        <label>Chat ID Terdeteksi</label>
+        <div class="chatid-display">
+          <span class="chatid-value" id="chatid-value">—</span>
+          <span class="chatid-badge">✓ Terverifikasi</span>
+        </div>
+      </div>
+
+      <!-- Error box -->
+      <div class="error-box" id="fetch-error" style="margin-top:14px;"></div>
+
+      <!-- Submit error -->
+      <div class="error-box" id="alert-error" style="margin-top:14px;"></div>
+
+      <div style="margin-top:20px;">
+        <button class="btn btn-secondary" onclick="goStep2()">← Kembali</button>
+        <button class="btn btn-primary" id="btn-submit" onclick="submitForm()" disabled>Aktifkan Sekarang 🚀</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Success -->
+    <div class="step-panel" id="step-success">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Tracker Aktif!</div>
+      <p class="success-desc">
+        Bot Telegram dan Google Sheet Anda sudah siap.<br><br>
+        Cek bot Telegram Anda — pesan sambutan sudah dikirim beserta link Google Sheet Anda.<br><br>
+        <strong style="color: var(--accent)">Selamat menggunakan! 💰</strong>
+      </p>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Butuh bantuan? Hubungi support kami
+  </div>
+</div>
+
+<script>
+  const WEBHOOK_URL = 'https://n8n-bagong71.deployaja.id/webhook/onboarding';
+
+  let formData = {};
+
+  function updateDots(step) {
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById('dot-' + i);
+      dot.className = 'step-dot';
+      if (i < step) dot.classList.add('done');
+      else if (i === step) dot.classList.add('active');
+    }
+  }
+
+  function showStep(id) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function showError(fieldId, errId, show) {
+    const input = document.getElementById(fieldId);
+    const err = document.getElementById(errId);
+    if (show) { input.classList.add('error'); err.style.display = 'block'; }
+    else { input.classList.remove('error'); err.style.display = 'none'; }
+  }
+
+  function goStep1() { updateDots(1); showStep('step-1'); }
+
+  function goStep2() {
+    const nama = document.getElementById('nama').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    showError('nama', 'err-nama', !nama);
+    showError('email', 'err-email', !emailValid);
+    if (!nama || !emailValid) return;
+    formData.nama = nama;
+    formData.email = email;
+    updateDots(2);
+    showStep('step-2');
+  }
+
+  function goStep3() {
+    const token = document.getElementById('token').value.trim();
+    const tokenValid = /^\d+:[A-Za-z0-9_-]{35,}$/.test(token);
+    showError('token', 'err-token', !tokenValid);
+    if (!tokenValid) return;
+    formData.telegram_token = token;
+    // Reset step 3 state
+    document.getElementById('chatid-result').style.display = 'none';
+    document.getElementById('fetch-error').style.display = 'none';
+    document.getElementById('btn-submit').disabled = true;
+    document.getElementById('btn-fetch').textContent = '🔍 Deteksi Chat ID Otomatis';
+    document.getElementById('btn-fetch').disabled = false;
+    updateDots(3);
+    showStep('step-3');
+  }
+
+  async function fetchChatId() {
+    const btn = document.getElementById('btn-fetch');
+    const resultEl = document.getElementById('chatid-result');
+    const errorEl = document.getElementById('fetch-error');
+    const submitBtn = document.getElementById('btn-submit');
+
+    errorEl.style.display = 'none';
+    resultEl.style.display = 'none';
+    submitBtn.disabled = true;
+    btn.disabled = true;
+
+    const MAX_RETRY = 6;
+    const DELAY_MS = 2000;
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    // Validasi token dulu sebelum fetch
+    const validateToken = async () => {
+      const res = await fetch(`https://api.telegram.org/bot${formData.telegram_token}/getMe`);
+      const data = await res.json();
+      if (!data.ok) throw new Error("Token tidak valid. Pastikan token sudah benar.");
+      return true;
+    };
+
+    // Fetch chat ID tanpa deleteWebhook - pakai offset -1 untuk pesan terbaru saja
+    const tryFetch = async (attempt) => {
+      btn.innerHTML = `<span class="btn-loading"><span class="spinner-green"></span>Mendeteksi${attempt > 1 ? ` (percobaan ${attempt}/${MAX_RETRY})` : ""}...</span>`;
+      
+      // Gunakan getUpdates dengan allowed_updates hanya message
+      const res = await fetch(
+        `https://api.telegram.org/bot${formData.telegram_token}/getUpdates?limit=10&allowed_updates=["message"]`
+      );
+      const data = await res.json();
+      
+      if (!data.ok) throw new Error("Token tidak valid. Pastikan token sudah benar dan coba lagi.");
+      if (!data.result || data.result.length === 0) return null;
+
+      // Ambil chat ID dari update terbaru
+      for (let i = data.result.length - 1; i >= 0; i--) {
+        const update = data.result[i];
+        const chatId = update.message?.chat?.id || update.callback_query?.from?.id;
+        if (chatId) return String(chatId);
+      }
+      return null;
+    };
+
+    try {
+      // Validasi token dulu
+      await validateToken();
+
+      let chatId = null;
+      for (let attempt = 1; attempt <= MAX_RETRY; attempt++) {
+        chatId = await tryFetch(attempt);
+        if (chatId) break;
+        if (attempt < MAX_RETRY) {
+          btn.innerHTML = `<span class="btn-loading"><span class="spinner-green"></span>Menunggu pesan /start... (${attempt}/${MAX_RETRY})</span>`;
+          await sleep(DELAY_MS);
+        }
+      }
+
+      if (!chatId) throw new Error("Belum terdeteksi. Pastikan Anda sudah kirim /start ke bot, lalu klik Coba Lagi.");
+
+      formData.chat_id = chatId;
+      document.getElementById("chatid-value").textContent = chatId;
+      resultEl.style.display = "block";
+      submitBtn.disabled = false;
+      btn.textContent = "✓ Terdeteksi — Klik lagi untuk refresh";
+      btn.style.opacity = "0.6";
+      btn.disabled = false;
+
+    } catch (err) {
+      errorEl.textContent = "⚠️ " + err.message;
+      errorEl.style.display = "block";
+      btn.textContent = "🔍 Coba Lagi";
+      btn.disabled = false;
+    }
+  }
+
+  async function submitForm() {
+    const btn = document.getElementById('btn-submit');
+    const alertEl = document.getElementById('alert-error');
+    alertEl.style.display = 'none';
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="btn-loading"><span class="spinner"></span>Mengaktifkan...</span>';
+
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!res.ok) throw new Error('Server error: ' + res.status);
+
+      document.querySelectorAll('.step-dot').forEach(d => { d.className = 'step-dot done'; });
+      showStep('step-success');
+
+    } catch (err) {
+      alertEl.textContent = 'Terjadi kesalahan: ' + err.message + '. Silakan coba lagi.';
+      alertEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Aktifkan Sekarang 🚀';
+    }
+  }
+</script>
+</body>
+</html>
