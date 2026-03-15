@@ -405,6 +405,16 @@
 
       if (!res.ok) throw new Error('Server error: ' + res.status);
 
+      const result = await res.json();
+
+      if (result.duplicate) {
+        alertEl.innerHTML = '⚠️ Email ini sudah terdaftar.<br>Buka bot Telegram Anda dan ketik <b>menu</b> untuk mulai menggunakan tracker.';
+        alertEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Aktifkan Sekarang 🚀';
+        return;
+      }
+
       document.querySelectorAll('.step-dot').forEach(d => { d.className = 'step-dot done'; });
       showStep('step-success');
 
