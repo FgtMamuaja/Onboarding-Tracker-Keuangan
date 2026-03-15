@@ -138,6 +138,7 @@
   }
   .btn-secondary:hover { color: var(--text); border-color: var(--muted); }
 
+  /* Fetch button */
   .btn-fetch {
     background: rgba(124,252,138,0.08);
     border: 1px solid rgba(124,252,138,0.25);
@@ -149,6 +150,7 @@
   .btn-fetch:hover { background: rgba(124,252,138,0.14); transform: translateY(-1px); }
   .btn-fetch:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+  /* Chat ID result display */
   .chatid-display {
     display: flex; align-items: center; justify-content: space-between;
     background: var(--bg); border: 1px solid rgba(124,252,138,0.3);
@@ -161,6 +163,7 @@
     padding: 4px 10px; border-radius: 100px;
   }
 
+  /* Error box */
   .error-box {
     background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2);
     color: var(--error); font-size: 13px; padding: 12px 16px;
@@ -235,40 +238,43 @@
       <div class="field">
         <label>Token Bot Telegram</label>
         <input type="text" id="token" placeholder="Contoh: 7123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw">
-        <div class="field-error" id="err-token">Masukkan token bot yang valid (format: angka:huruf)</div>
+        <div class="field-error" id="err-token">Masukkan token bot yang valid</div>
       </div>
 
       <button class="btn btn-secondary" onclick="goStep1()">← Kembali</button>
       <button class="btn btn-primary" onclick="goStep3()">Lanjut →</button>
     </div>
 
-    <!-- Step 3: Verifikasi Bot -->
+    <!-- Step 3: Chat ID via @userinfobot -->
     <div class="step-panel" id="step-3">
-      <div class="step-title">Verifikasi Bot</div>
-      <div class="step-desc">Satu langkah lagi — kirim pesan ke bot Anda, lalu klik deteksi.</div>
+      <div class="step-title">Verifikasi Identitas</div>
+      <div class="step-desc">Dapatkan Chat ID Anda dari Telegram — hanya butuh 30 detik.</div>
 
       <div class="instruction">
-        <div class="instruction-title">📱 Cara verifikasi</div>
+        <div class="instruction-title">📱 Cara dapat Chat ID</div>
         <ol>
-          <li>Buka Telegram → cari nama bot yang baru Anda buat</li>
-          <li>Kirim pesan <code>/start</code> ke bot tersebut</li>
-          <li>Kembali ke sini → klik <strong style="color:var(--accent)">Deteksi Otomatis</strong> di bawah</li>
+          <li>Buka Telegram → cari <code>@userinfobot</code></li>
+          <li>Ketik <code>/start</code> ke bot tersebut</li>
+          <li>Bot akan balas dengan data Anda — copy angka di baris <strong>Id</strong></li>
+          <li>Paste di kolom di bawah</li>
         </ol>
       </div>
 
-      <button class="btn btn-fetch" id="btn-fetch" onclick="fetchChatId()">
-        🔍 Deteksi Chat ID Otomatis
-      </button>
+      <div class="field">
+        <label>Chat ID Telegram</label>
+        <input type="text" id="chatid-input" placeholder="Contoh: 1287197203" oninput="onChatIdInput(this.value)">
+        <div class="field-error" id="err-chatid">Chat ID harus berupa angka</div>
+      </div>
 
-      <div id="chatid-result" style="display:none; margin-top:16px;">
-        <label>Chat ID Terdeteksi</label>
+      <!-- Preview box -->
+      <div id="chatid-result" style="display:none; margin-top:4px;">
         <div class="chatid-display">
           <span class="chatid-value" id="chatid-value">—</span>
-          <span class="chatid-badge">✓ Terverifikasi</span>
+          <span class="chatid-badge">✓ Valid</span>
         </div>
       </div>
 
-      <div class="error-box" id="fetch-error" style="margin-top:14px;"></div>
+      <!-- Submit error -->
       <div class="error-box" id="alert-error" style="margin-top:14px;"></div>
 
       <div style="margin-top:20px;">
@@ -338,80 +344,47 @@
 
   function goStep3() {
     const token = document.getElementById('token').value.trim();
-    // FIX: dilonggarkan dari {35,} ke {30,} agar semua token Telegram valid diterima
-    const tokenValid = /^\d+:[A-Za-z0-9_-]{30,}$/.test(token);
+    const tokenValid = /^\d+:[A-Za-z0-9_-]{35,}$/.test(token);
     showError('token', 'err-token', !tokenValid);
     if (!tokenValid) return;
     formData.telegram_token = token;
     // Reset step 3 state
+    document.getElementById('chatid-input').value = '';
     document.getElementById('chatid-result').style.display = 'none';
-    document.getElementById('fetch-error').style.display = 'none';
+    document.getElementById('err-chatid').style.display = 'none';
     document.getElementById('btn-submit').disabled = true;
-    document.getElementById('btn-fetch').textContent = '🔍 Deteksi Chat ID Otomatis';
-    document.getElementById('btn-fetch').disabled = false;
     updateDots(3);
     showStep('step-3');
   }
 
-  async function fetchChatId() {
-    const btn = document.getElementById('btn-fetch');
+  function onChatIdInput(value) {
+    const clean = value.trim();
+    const isValid = /^\d{5,15}$/.test(clean);
     const resultEl = document.getElementById('chatid-result');
-    const errorEl = document.getElementById('fetch-error');
+    const errEl = document.getElementById('err-chatid');
     const submitBtn = document.getElementById('btn-submit');
+    const inputEl = document.getElementById('chatid-input');
 
-    errorEl.style.display = 'none';
-    resultEl.style.display = 'none';
-    submitBtn.disabled = true;
-    btn.disabled = true;
+    if (clean === '') {
+      resultEl.style.display = 'none';
+      errEl.style.display = 'none';
+      inputEl.classList.remove('error');
+      submitBtn.disabled = true;
+      return;
+    }
 
-    const MAX_RETRY = 6;
-    const DELAY_MS = 2000;
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-    const proxyFetch = async (attempt) => {
-      btn.innerHTML = `<span class="btn-loading"><span class="spinner-green"></span>Mendeteksi${attempt > 1 ? ` (percobaan ${attempt}/${MAX_RETRY})` : ""}...</span>`;
-
-      const res = await fetch('https://n8n-bagong71.deployaja.id/webhook/get-chat-id', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegram_token: formData.telegram_token })
-      });
-
-      if (!res.ok) throw new Error("Server error. Coba lagi.");
-      const data = await res.json();
-
-      if (data.error === 'invalid_token') throw new Error("Token tidak valid. Pastikan token sudah benar dan coba lagi.");
-      if (data.error === 'no_updates') return null;
-      if (data.chat_id) return String(data.chat_id);
-      return null;
-    };
-
-    try {
-      let chatId = null;
-      for (let attempt = 1; attempt <= MAX_RETRY; attempt++) {
-        chatId = await proxyFetch(attempt);
-        if (chatId) break;
-        if (attempt < MAX_RETRY) {
-          btn.innerHTML = `<span class="btn-loading"><span class="spinner-green"></span>Menunggu pesan /start... (${attempt}/${MAX_RETRY})</span>`;
-          await sleep(DELAY_MS);
-        }
-      }
-
-      if (!chatId) throw new Error("Belum terdeteksi. Pastikan Anda sudah kirim /start ke bot, lalu klik Coba Lagi.");
-
-      formData.chat_id = chatId;
-      document.getElementById("chatid-value").textContent = chatId;
-      resultEl.style.display = "block";
+    if (isValid) {
+      formData.chat_id = clean;
+      document.getElementById('chatid-value').textContent = clean;
+      resultEl.style.display = 'block';
+      errEl.style.display = 'none';
+      inputEl.classList.remove('error');
       submitBtn.disabled = false;
-      btn.textContent = "✓ Terdeteksi — Klik lagi untuk refresh";
-      btn.style.opacity = "0.6";
-      btn.disabled = false;
-
-    } catch (err) {
-      errorEl.textContent = "⚠️ " + err.message;
-      errorEl.style.display = "block";
-      btn.textContent = "🔍 Coba Lagi";
-      btn.disabled = false;
+    } else {
+      resultEl.style.display = 'none';
+      errEl.style.display = 'block';
+      inputEl.classList.add('error');
+      submitBtn.disabled = true;
     }
   }
 
