@@ -203,7 +203,16 @@
     <!-- Step 1: Data Diri -->
     <div class="step-panel active" id="step-1">
       <div class="step-title">Data Diri</div>
-      <div class="step-desc">Masukkan nama dan email Google Anda — sheet akan di-share ke email ini.</div>
+      <div class="step-desc">Isi data berikut untuk membuat akun tracker Anda.</div>
+
+      <div class="instruction">
+        <div class="instruction-title">ℹ️ Kenapa perlu email Google?</div>
+        <ol>
+          <li>Google Sheet tracker Anda akan otomatis di-share ke email ini</li>
+          <li>Pastikan email yang Anda masukkan adalah akun Google aktif</li>
+          <li>Setelah aktivasi, cek Google Drive Anda untuk menemukan sheet tersebut</li>
+        </ol>
+      </div>
 
       <div class="field">
         <label>Nama Lengkap</label>
@@ -212,9 +221,9 @@
       </div>
 
       <div class="field">
-        <label>Email Google</label>
+        <label>Email Google (Gmail)</label>
         <input type="email" id="email" placeholder="Contoh: budi@gmail.com">
-        <div class="field-error" id="err-email">Masukkan email yang valid</div>
+        <div class="field-error" id="err-email">Masukkan email Google yang valid</div>
       </div>
 
       <button class="btn btn-primary" onclick="goStep2()">Lanjut →</button>
@@ -222,23 +231,25 @@
 
     <!-- Step 2: Token Bot -->
     <div class="step-panel" id="step-2">
-      <div class="step-title">Token Bot Telegram</div>
-      <div class="step-desc">Buat bot Telegram Anda sendiri dalam 2 menit.</div>
+      <div class="step-title">Buat Bot Telegram</div>
+      <div class="step-desc">Bot ini adalah asisten pribadi keuangan Anda di Telegram.</div>
 
       <div class="instruction">
-        <div class="instruction-title">📱 Cara dapat Token Bot</div>
+        <div class="instruction-title">📱 Cara membuat Bot Telegram</div>
         <ol>
-          <li>Buka Telegram → cari <code>@BotFather</code></li>
-          <li>Ketik <code>/newbot</code> dan ikuti instruksinya</li>
-          <li>Beri nama bot Anda (bebas)</li>
-          <li>Copy token yang diberikan (format: <code>123456:ABC-xxx</code>)</li>
+          <li>Buka Telegram → di kolom pencarian ketik <code>@BotFather</code> → tap</li>
+          <li>Tap tombol <strong>Start</strong> atau ketik <code>/start</code></li>
+          <li>Ketik <code>/newbot</code> dan kirim</li>
+          <li>BotFather akan minta nama bot — isi bebas, contoh: <code>Tracker Keuangan Saya</code></li>
+          <li>BotFather akan minta username bot — harus diakhiri <code>bot</code>, contoh: <code>trackerku_bot</code></li>
+          <li>Setelah berhasil, BotFather akan kirim <strong>token</strong> — copy seluruh angka dan huruf tersebut</li>
         </ol>
       </div>
 
       <div class="field">
         <label>Token Bot Telegram</label>
         <input type="text" id="token" placeholder="Contoh: 7123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw">
-        <div class="field-error" id="err-token">Masukkan token bot yang valid</div>
+        <div class="field-error" id="err-token">Token tidak valid. Pastikan format: angka:huruf (minimal 35 karakter setelah titik dua)</div>
       </div>
 
       <button class="btn btn-secondary" onclick="goStep1()">← Kembali</button>
@@ -248,22 +259,30 @@
     <!-- Step 3: Chat ID via @userinfobot -->
     <div class="step-panel" id="step-3">
       <div class="step-title">Verifikasi Identitas</div>
-      <div class="step-desc">Dapatkan Chat ID Anda dari Telegram — hanya butuh 30 detik.</div>
+      <div class="step-desc">Chat ID adalah nomor unik akun Telegram Anda — digunakan agar bot tahu ke mana harus mengirim pesan.</div>
 
       <div class="instruction">
-        <div class="instruction-title">📱 Cara dapat Chat ID</div>
+        <div class="instruction-title">📱 Cara mendapatkan Chat ID</div>
         <ol>
-          <li>Buka Telegram → cari <code>@userinfobot</code></li>
-          <li>Ketik <code>/start</code> ke bot tersebut</li>
-          <li>Bot akan balas dengan data Anda — copy angka di baris <strong>Id</strong></li>
-          <li>Paste di kolom di bawah</li>
+          <li>Buka Telegram → di kolom pencarian ketik <code>@userinfobot</code> → tap</li>
+          <li>Tap tombol <strong>Start</strong> atau ketik <code>/start</code> dan kirim</li>
+          <li>Bot akan langsung membalas pesan berisi data Anda seperti ini:<br>
+            <span style="display:inline-block; margin-top:8px; background:rgba(124,252,138,0.06); border:1px solid rgba(124,252,138,0.15); border-radius:8px; padding:10px 14px; font-size:12px; font-family:monospace; color:#b0b0c0; line-height:1.8;">
+              Id: <strong style="color:var(--accent)">1287197203</strong><br>
+              First: Budi<br>
+              Last: Santoso<br>
+              Lang: id
+            </span>
+          </li>
+          <li>Copy angka di baris <strong>Id</strong> — itulah Chat ID Anda</li>
+          <li>Paste di kolom di bawah ini</li>
         </ol>
       </div>
 
       <div class="field">
         <label>Chat ID Telegram</label>
         <input type="text" id="chatid-input" placeholder="Contoh: 1287197203" oninput="onChatIdInput(this.value)">
-        <div class="field-error" id="err-chatid">Chat ID harus berupa angka</div>
+        <div class="field-error" id="err-chatid">Chat ID tidak valid — harus berupa angka 5-15 digit</div>
       </div>
 
       <!-- Preview box -->
@@ -286,12 +305,54 @@
     <!-- Step 4: Success -->
     <div class="step-panel" id="step-success">
       <div class="success-icon">✅</div>
-      <div class="success-title">Tracker Aktif!</div>
+      <div class="success-title">Aktivasi Berhasil!</div>
       <p class="success-desc">
-        Bot Telegram dan Google Sheet Anda sudah siap.<br><br>
-        Cek bot Telegram Anda — pesan sambutan sudah dikirim beserta link Google Sheet Anda.<br><br>
-        <strong style="color: var(--accent)">Selamat menggunakan! 💰</strong>
+        Bot dan Google Sheet Anda sudah siap. Ikuti langkah berikut untuk mulai menggunakan:
       </p>
+
+      <div style="margin-top:24px; text-align:left;">
+
+        <div style="display:flex; gap:14px; margin-bottom:20px; align-items:flex-start;">
+          <div style="min-width:32px; height:32px; background:rgba(124,252,138,0.12); border:1px solid rgba(124,252,138,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; color:var(--accent); font-size:14px;">1</div>
+          <div>
+            <div style="font-weight:600; font-size:14px; margin-bottom:4px;">Cek email Google Anda</div>
+            <div style="color:var(--muted); font-size:13px; line-height:1.6;">Google Drive akan mengirim notifikasi bahwa sebuah sheet telah dibagikan ke Anda. Klik link tersebut untuk membuka Google Sheet tracker Anda.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:14px; margin-bottom:20px; align-items:flex-start;">
+          <div style="min-width:32px; height:32px; background:rgba(124,252,138,0.12); border:1px solid rgba(124,252,138,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; color:var(--accent); font-size:14px;">2</div>
+          <div>
+            <div style="font-weight:600; font-size:14px; margin-bottom:4px;">Buka bot Telegram Anda</div>
+            <div style="color:var(--muted); font-size:13px; line-height:1.6;">Buka Telegram → cari username bot yang baru Anda buat tadi (yang Anda daftarkan di step 2) → tap untuk membuka chat.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:14px; margin-bottom:20px; align-items:flex-start;">
+          <div style="min-width:32px; height:32px; background:rgba(124,252,138,0.12); border:1px solid rgba(124,252,138,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; color:var(--accent); font-size:14px;">3</div>
+          <div>
+            <div style="font-weight:600; font-size:14px; margin-bottom:4px;">Ketik /start dan kirim</div>
+            <div style="color:var(--muted); font-size:13px; line-height:1.6;">Bot akan membalas dengan pesan sambutan, link Google Sheet Anda, dan tombol menu navigasi.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:14px; align-items:flex-start;">
+          <div style="min-width:32px; height:32px; background:rgba(124,252,138,0.12); border:1px solid rgba(124,252,138,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; color:var(--accent); font-size:14px;">4</div>
+          <div>
+            <div style="font-weight:600; font-size:14px; margin-bottom:4px;">Mulai catat transaksi!</div>
+            <div style="color:var(--muted); font-size:13px; line-height:1.6;">Langsung ketik transaksi di bot, contoh: <span style="font-family:monospace; background:rgba(124,252,138,0.08); color:var(--accent); padding:1px 6px; border-radius:4px;">makan 25k</span> atau <span style="font-family:monospace; background:rgba(124,252,138,0.08); color:var(--accent); padding:1px 6px; border-radius:4px;">gaji 3.5jt</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:24px; padding:14px 16px; background:rgba(255,200,0,0.06); border:1px solid rgba(255,200,0,0.15); border-radius:10px;">
+        <div style="font-size:12px; color:#b0a060; line-height:1.6;">⚠️ <strong>Penting:</strong> Bot tidak bisa mengirim pesan duluan sebelum Anda ketik <strong>/start</strong>. Ini adalah kebijakan Telegram untuk melindungi privasi pengguna.</div>
+      </div>
+
+      <div style="margin-top:20px; text-align:center;">
+        <strong style="color: var(--accent); font-size:15px;">Selamat menggunakan! 💰</strong>
+      </div>
     </div>
 
   </div>
