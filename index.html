@@ -568,38 +568,63 @@ async function aktivasi() {
     chat_id: chatid,
   };
 
+  const showSuccess = () => {
+    document.getElementById('panel3').classList.remove('active');
+    document.getElementById('panelSuccess').classList.add('active');
+    document.getElementById('stepsBar').style.display = 'none';
+  };
+  const showError = (title, msg) => {
+    document.getElementById('errTitle').textContent = title;
+    document.getElementById('errMsg').textContent = msg;
+    document.getElementById('panel3').classList.remove('active');
+    document.getElementById('panelError').classList.add('active');
+    document.getElementById('stepsBar').style.display = 'none';
+  };
+  const resetBtn = () => {
+    btn.disabled = false;
+    btn.innerHTML = 'Aktifkan Sekarang 🚀';
+  };
+
+  // Timeout 30 detik
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+
   try {
     const res = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: controller.signal,
     });
-    const data = await res.json();
+    clearTimeout(timer);
+
+    // Parse as text dulu, lalu coba JSON — hindari error parsing
+    const raw = await res.text();
+    let data = {};
+    try { data = JSON.parse(raw); } catch(_) {
+      // Jika response bukan JSON tapi status 200, anggap sukses
+      if (res.ok) { resetBtn(); showSuccess(); return; }
+      throw new Error('Response tidak valid dari server.');
+    }
 
     if (data.duplicate) {
-      document.getElementById('errTitle').textContent = 'Email Sudah Terdaftar';
-      document.getElementById('errMsg').textContent = data.message || 'Email ini sudah terdaftar. Cek bot Telegram kamu atau hubungi support.';
-      goStep(3);
-      document.getElementById('panel3').classList.remove('active');
-      document.getElementById('panelError').classList.add('active');
-      document.getElementById('stepsBar').style.display = 'none';
-    } else if (data.success) {
-      document.getElementById('panel3').classList.remove('active');
-      document.getElementById('panelSuccess').classList.add('active');
-      document.getElementById('stepsBar').style.display = 'none';
+      resetBtn();
+      showError('Email Sudah Terdaftar', data.message || 'Email ini sudah terdaftar. Cek bot Telegram kamu atau hubungi support.');
+    } else if (data.success === true || res.ok) {
+      resetBtn();
+      showSuccess();
     } else {
-      throw new Error(data.message || 'Gagal aktivasi');
+      throw new Error(data.message || 'Aktivasi gagal. Coba lagi.');
     }
   } catch (err) {
-    document.getElementById('errTitle').textContent = 'Terjadi Kesalahan';
-    document.getElementById('errMsg').textContent = err.message || 'Koneksi gagal. Periksa jaringan kamu dan coba lagi.';
-    document.getElementById('panel3').classList.remove('active');
-    document.getElementById('panelError').classList.add('active');
-    document.getElementById('stepsBar').style.display = 'none';
+    clearTimeout(timer);
+    resetBtn();
+    if (err.name === 'AbortError') {
+      showError('Koneksi Timeout', 'Server tidak merespons dalam 30 detik. Periksa koneksi internet kamu dan coba lagi.');
+    } else {
+      showError('Terjadi Kesalahan', err.message || 'Koneksi gagal. Periksa jaringan kamu dan coba lagi.');
+    }
   }
-
-  btn.disabled = false;
-  btn.innerHTML = 'Aktifkan Sekarang 🚀';
 }
 </script>
 </body>
