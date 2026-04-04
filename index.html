@@ -437,16 +437,89 @@
       </form>
     </div>
 
-    <p class="footer-note">
+    <p class="footer-note" id="footerNote">
+      Butuh bantuan? Hubungi admin melalui Telegram
+    </p>
+  </div>
+
+  <!-- ── PANEL SUKSES ── -->
+  <div class="wrapper" id="panelSukses" style="display:none">
+    <div style="text-align:center;margin-bottom:36px;animation:fadeUp 0.6s ease both">
+      <div class="badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.3);color:#4ade80">Aktivasi Berhasil</div>
+      <h1 style="margin-top:16px">Akun Kamu<br><span style="background:linear-gradient(135deg,#4ade80,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Sudah Aktif!</span></h1>
+      <p style="color:var(--muted);font-size:14px;margin-top:10px;line-height:1.6">Setup berhasil. Bot Telegram kamu sudah siap digunakan.</p>
+    </div>
+
+    <div class="card" style="animation:fadeUp 0.6s ease 0.1s both">
+      <!-- Nama user -->
+      <div style="text-align:center;padding:8px 0 24px">
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(74,222,128,0.12);border:2px solid rgba(74,222,128,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px">✓</div>
+        <p style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800" id="successNama">—</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:4px" id="successEmail">—</p>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:20px;display:flex;flex-direction:column;gap:14px">
+        <!-- Step 1 -->
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:28px;height:28px;border-radius:50%;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#4ade80;flex-shrink:0">1</div>
+          <div>
+            <p style="font-weight:500;font-size:14px">Buka bot Telegram kamu</p>
+            <p style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5">Cari bot yang kamu daftarkan di Telegram, lalu klik Start atau kirim pesan pertama.</p>
+          </div>
+        </div>
+        <!-- Step 2 -->
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:28px;height:28px;border-radius:50%;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#4ade80;flex-shrink:0">2</div>
+          <div>
+            <p style="font-weight:500;font-size:14px">Google Sheet kamu sudah siap</p>
+            <p style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5">Cek email — sheet tracker sudah dibagikan ke akun Google kamu secara otomatis.</p>
+          </div>
+        </div>
+        <!-- Step 3 -->
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:28px;height:28px;border-radius:50%;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#4ade80;flex-shrink:0">3</div>
+          <div>
+            <p style="font-weight:500;font-size:14px">Mulai catat keuangan</p>
+            <p style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5">Gunakan perintah di bot Telegram untuk mulai mencatat pemasukan dan pengeluaran.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-top:20px;font-size:12px;color:var(--muted);animation:fadeUp 0.6s ease 0.2s both">
+      Butuh bantuan? Hubungi admin melalui Telegram
+    </p>
+  </div>
+
+  <!-- ── PANEL KODE TERPAKAI ── -->
+  <div class="wrapper" id="panelDuplikat" style="display:none">
+    <div style="text-align:center;margin-bottom:36px;animation:fadeUp 0.6s ease both">
+      <div class="badge" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3);color:var(--warning)">Perhatian</div>
+      <h1 style="margin-top:16px">Kode atau Email<br><span style="background:linear-gradient(135deg,#fbbf24,#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Sudah Terdaftar</span></h1>
+      <p style="color:var(--muted);font-size:14px;margin-top:10px;line-height:1.6" id="duplikatMsg">Email atau kode undangan ini sudah pernah digunakan.</p>
+    </div>
+
+    <div class="card" style="animation:fadeUp 0.6s ease 0.1s both">
+      <div style="text-align:center;padding:8px 0 24px">
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(251,191,36,0.08);border:2px solid rgba(251,191,36,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px">⚠</div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.7">Jika kamu sudah pernah mendaftar, bot Telegram kamu seharusnya sudah aktif.<br><br>Jika belum bisa digunakan atau ada masalah, hubungi admin untuk mendapatkan bantuan.</p>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:16px;display:flex;flex-direction:column;gap:10px">
+        <button class="submit-btn" onclick="resetForm()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border-glow)">
+          ← Kembali ke Form
+        </button>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-top:20px;font-size:12px;color:var(--muted);animation:fadeUp 0.6s ease 0.2s both">
       Butuh bantuan? Hubungi admin melalui Telegram
     </p>
   </div>
 
   <script>
-    // Auto-format invite code: huruf kapital + strip
     document.getElementById('invite_code').addEventListener('input', function(e) {
-      let val = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
-      e.target.value = val;
+      e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
     });
 
     document.getElementById('onboardingForm').addEventListener('submit', async function(e) {
@@ -456,7 +529,6 @@
       const alertBox = document.getElementById('alertBox');
       const invite_code = document.getElementById('invite_code').value.trim().toUpperCase();
 
-      // Validasi kode undangan di sisi client
       if (!invite_code) {
         showAlert('error', '🔐 Masukkan kode undangan terlebih dahulu.');
         return;
@@ -466,7 +538,6 @@
       const body = Object.fromEntries(formData.entries());
       body.invite_code = invite_code;
 
-      // Loading state
       btn.classList.add('loading');
       btn.disabled = true;
       alertBox.className = 'alert';
@@ -484,11 +555,14 @@
         if (data.invalid_code) {
           showAlert('error', '❌ Kode undangan tidak valid atau sudah digunakan. Hubungi admin untuk mendapatkan kode baru.');
         } else if (data.duplicate) {
-          showAlert('warning', '⚠️ Email ini sudah terdaftar. Silakan cek bot Telegram kamu atau hubungi admin.');
+          showPanel('duplikat', {
+            msg: 'Email <strong>' + body.email + '</strong> sudah terdaftar sebelumnya.'
+          });
         } else if (data.success) {
-          showAlert('success', '🎉 Berhasil! Akun kamu sudah aktif. Cek bot Telegram untuk memulai.');
-          this.reset();
-          document.getElementById('invite_code').value = '';
+          showPanel('sukses', {
+            nama: body.nama,
+            email: body.email
+          });
         } else {
           showAlert('error', '😕 Terjadi kesalahan. Coba lagi atau hubungi admin.');
         }
@@ -499,6 +573,31 @@
         btn.disabled = false;
       }
     });
+
+    function showPanel(type, data) {
+      // Sembunyikan form
+      document.querySelector('.wrapper:first-of-type').style.display = 'none';
+      document.getElementById('footerNote').style.display = 'none';
+
+      if (type === 'sukses') {
+        document.getElementById('successNama').textContent = data.nama;
+        document.getElementById('successEmail').textContent = data.email;
+        document.getElementById('panelSukses').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (type === 'duplikat') {
+        document.getElementById('duplikatMsg').innerHTML = data.msg;
+        document.getElementById('panelDuplikat').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('panelDuplikat').style.display = 'none';
+      document.getElementById('panelSukses').style.display = 'none';
+      document.querySelector('.wrapper:first-of-type').style.display = 'block';
+      document.getElementById('footerNote').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     function showAlert(type, message) {
       const alertBox = document.getElementById('alertBox');
