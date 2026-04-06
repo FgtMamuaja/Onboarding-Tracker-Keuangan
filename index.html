@@ -551,29 +551,42 @@
         });
 
         const rawText = await res.text();
-        console.log('Response raw:', rawText);
+        console.log('n8n raw response:', rawText);
 
+        // Coba parse JSON
         let data = {};
-        try { data = JSON.parse(rawText); } catch(e) { console.error('Parse error:', e); }
+        try {
+          const parsed = JSON.parse(rawText);
+          // n8n kadang wrap dalam array: [{...}] atau langsung {...}
+          data = Array.isArray(parsed) ? parsed[0] : parsed;
+        } catch(e) {
+          console.error('JSON parse error:', e);
+        }
 
-        console.log('Response data:', data);
+        console.log('Parsed data:', JSON.stringify(data));
 
-        if (data.invalid_code) {
+        // Cek semua kemungkinan format response n8n
+        const isSuccess  = data.success === true || data.success === 'true';
+        const isDuplicate = data.duplicate === true || data.duplicate === 'true';
+        const isInvalidCode = data.invalid_code === true || data.invalid_code === 'true';
+
+        if (isInvalidCode) {
           showAlert('error', '❌ Kode undangan tidak valid atau sudah digunakan. Hubungi admin untuk mendapatkan kode baru.');
-        } else if (data.duplicate) {
+        } else if (isDuplicate) {
           showPanel('duplikat', {
             msg: 'Email <strong>' + body.email + '</strong> sudah terdaftar sebelumnya.'
           });
-        } else if (data.success === true) {
+        } else if (isSuccess) {
           showPanel('sukses', {
             nama: body.nama,
             email: body.email
           });
         } else {
-          showAlert('error', '😕 Terjadi kesalahan. Coba lagi atau hubungi admin.<br><small style="opacity:0.6">' + rawText + '</small>');
+          // Tampilkan raw response agar bisa debug
+          showAlert('error', '😕 Response tidak dikenali. Raw: <code style="font-size:11px;word-break:break-all">' + rawText.substring(0, 300) + '</code>');
         }
       } catch (err) {
-        showAlert('error', '🌐 Koneksi gagal. Periksa internet kamu dan coba lagi.<br><small style="opacity:0.6">' + err.message + '</small>');
+        showAlert('error', '🌐 Koneksi gagal: ' + err.message);
       } finally {
         btn.classList.remove('loading');
         btn.disabled = false;
