@@ -362,7 +362,7 @@
   </style>
 </head>
 <body>
-  <div class="wrapper">
+  <div class="wrapper" id="panelForm">
     <div class="header">
       <div class="badge">Financial Tracker PRO</div>
       <h1>Aktivasi <span>Akun Kamu</span></h1>
@@ -550,7 +550,13 @@
           body: JSON.stringify(body)
         });
 
-        const data = await res.json();
+        const rawText = await res.text();
+        console.log('Response raw:', rawText);
+
+        let data = {};
+        try { data = JSON.parse(rawText); } catch(e) { console.error('Parse error:', e); }
+
+        console.log('Response data:', data);
 
         if (data.invalid_code) {
           showAlert('error', '❌ Kode undangan tidak valid atau sudah digunakan. Hubungi admin untuk mendapatkan kode baru.');
@@ -558,16 +564,16 @@
           showPanel('duplikat', {
             msg: 'Email <strong>' + body.email + '</strong> sudah terdaftar sebelumnya.'
           });
-        } else if (data.success) {
+        } else if (data.success === true) {
           showPanel('sukses', {
             nama: body.nama,
             email: body.email
           });
         } else {
-          showAlert('error', '😕 Terjadi kesalahan. Coba lagi atau hubungi admin.');
+          showAlert('error', '😕 Terjadi kesalahan. Coba lagi atau hubungi admin.<br><small style="opacity:0.6">' + rawText + '</small>');
         }
       } catch (err) {
-        showAlert('error', '🌐 Koneksi gagal. Periksa internet kamu dan coba lagi.');
+        showAlert('error', '🌐 Koneksi gagal. Periksa internet kamu dan coba lagi.<br><small style="opacity:0.6">' + err.message + '</small>');
       } finally {
         btn.classList.remove('loading');
         btn.disabled = false;
@@ -575,8 +581,7 @@
     });
 
     function showPanel(type, data) {
-      // Sembunyikan form
-      document.querySelector('.wrapper:first-of-type').style.display = 'none';
+      document.getElementById('panelForm').style.display = 'none';
       document.getElementById('footerNote').style.display = 'none';
 
       if (type === 'sukses') {
@@ -594,7 +599,7 @@
     function resetForm() {
       document.getElementById('panelDuplikat').style.display = 'none';
       document.getElementById('panelSukses').style.display = 'none';
-      document.querySelector('.wrapper:first-of-type').style.display = 'block';
+      document.getElementById('panelForm').style.display = 'block';
       document.getElementById('footerNote').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
