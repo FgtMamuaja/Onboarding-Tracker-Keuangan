@@ -31,6 +31,7 @@
       font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 24px;
@@ -566,23 +567,28 @@
         console.log('Parsed data:', JSON.stringify(data));
 
         // Cek semua kemungkinan format response n8n
-        const isSuccess  = data.success === true || data.success === 'true';
+        const isSuccess   = data.success === true || data.success === 'true';
         const isDuplicate = data.duplicate === true || data.duplicate === 'true';
         const isInvalidCode = data.invalid_code === true || data.invalid_code === 'true';
 
+        console.log('isSuccess:', isSuccess, '| isDuplicate:', isDuplicate, '| isInvalidCode:', isInvalidCode);
+
         if (isInvalidCode) {
+          console.log('→ showAlert error invalid_code');
           showAlert('error', '❌ Kode undangan tidak valid atau sudah digunakan. Hubungi admin untuk mendapatkan kode baru.');
         } else if (isDuplicate) {
+          console.log('→ showPanel duplikat');
           showPanel('duplikat', {
             msg: 'Email <strong>' + body.email + '</strong> sudah terdaftar sebelumnya.'
           });
         } else if (isSuccess) {
+          console.log('→ showPanel sukses');
           showPanel('sukses', {
             nama: body.nama,
             email: body.email
           });
         } else {
-          // Tampilkan raw response agar bisa debug
+          console.log('→ response tidak dikenali');
           showAlert('error', '😕 Response tidak dikenali. Raw: <code style="font-size:11px;word-break:break-all">' + rawText.substring(0, 300) + '</code>');
         }
       } catch (err) {
@@ -620,7 +626,10 @@
     function showAlert(type, message) {
       const alertBox = document.getElementById('alertBox');
       alertBox.className = `alert ${type} show`;
+      alertBox.style.display = 'flex';
       alertBox.innerHTML = `<span>${message}</span>`;
+      alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      console.log('showAlert called:', type, alertBox.style.display);
     }
   </script>
 </body>
